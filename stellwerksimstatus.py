@@ -4,7 +4,7 @@ import socket
 import time
 import errno
 import discordsdk as dsdk
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, freeze_support
 from collections import namedtuple
 import queue
 
@@ -290,6 +290,8 @@ def run_discord_process(input_queue):
 
 
 def main():
+    freeze_support()
+
     discordprocess = None
     discordqueue = None
 
