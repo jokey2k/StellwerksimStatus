@@ -186,7 +186,7 @@ class StellwerkSimPlugin:
     def parse_byte(self, data):
         self.parser.feed(data)
         for action, element in self.parser.read_events():
-            log.debug("Received action %s for tag %s" % (action, element.tag))
+            log.debug("....Received action %s for tag %s" % (action, element.tag))
             if action == "end" and element.tag == "status":
                 tree = self.reset_parser()
                 try:
@@ -195,6 +195,7 @@ class StellwerkSimPlugin:
                     log.error("Unhandled chars in status response: %s, response was: %s" % (str(e), etree.tostring(tree)))
                     continue
 
+                log.debug("....Got status, code: %s, content: %s" % (code, element.text))
                 if code == 300 and not self.registered:
                     log.debug("....Got register request")
                     self.trigger_register()
@@ -205,8 +206,8 @@ class StellwerkSimPlugin:
                     self.registered = True
                     pass
                 else:
-                    log.warning("Unexpected status code received: %s" % etree.tostring(tree))
             if action == "end" and element.tag == "anlageninfo":
+                    log.warning(".XX.Unexpected status code received: %s" % etree.tostring(tree))
                 log.debug("....Got info response")
                 tree = self.reset_parser()
                 try:
@@ -237,6 +238,8 @@ class StellwerkSimPlugin:
                 except etree.Error as e:
                     log.warning("Unexpected simzeit received: %s" % etree.tostring(tree))
                 self.query_state = None
+            else:
+                log.debug("....Got tag end for %s but not used, ignored" % element.tag)
 
     def trigger_register(self):
         self.query_state = "register"
