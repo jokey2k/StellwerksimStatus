@@ -206,8 +206,8 @@ class StellwerkSimPlugin:
                     self.registered = True
                     pass
                 else:
-            if action == "end" and element.tag == "anlageninfo":
                     log.warning(".XX.Unexpected status code received: %s" % etree.tostring(tree))
+            elif action == "end" and element.tag == "anlageninfo":
                 log.debug("....Got info response")
                 tree = self.reset_parser()
                 try:
@@ -220,7 +220,7 @@ class StellwerkSimPlugin:
                 except etree.Error as e:
                     log.warning("Unexpected anlageninfo received: %s" % etree.tostring(tree))
                 self.query_state = None
-            if action == "end" and element.tag == "simzeit":
+            elif action == "end" and element.tag == "simzeit":
                 log.debug("....Got simzeit response")
                 tree = self.reset_parser()
                 try:
