@@ -289,7 +289,7 @@ def run_discord_process(input_queue):
     plugin.process_events()
 
 
-def main():
+def main(stop_signal=None):
     freeze_support()
 
     discordprocess = None
@@ -333,6 +333,17 @@ def main():
         stellwerksim.process_socket()
         discordqueue.put(stellwerksim.combine_status())
         time.sleep(1)
+
+        if stop_signal is not None and stop_signal.is_set():
+            break
+    
+    if discordprocess.is_alive():
+        discordqueue.put(StopRequest())
+        discordprocess.join()
+        discordqueue.close()
+    discordprocess = None
+    discordqueue = None
+
 
 if __name__ == "__main__":
     main()
