@@ -3,7 +3,9 @@ from lxml import etree
 import socket
 import time
 import errno
-import discordsdk as dsdk
+import stellwerksimstatus.discordsdk as dsdk
+import stellwerksimstatus.discordsdk.model as dsdk_model
+
 from multiprocessing import Process, Queue, freeze_support
 from collections import namedtuple
 import queue
@@ -27,7 +29,7 @@ class StopRequest(StopIteration):
 
 # debug callback
 def debug_callback(debug, result, *args):
-    if result == dsdk.Result.ok:
+    if result == dsdk.Result.Ok:
         log.debug("%s: success" % debug)
     else:
         log.error("%s: failure, %s %s" % (debug, result, args))
@@ -37,12 +39,12 @@ class DiscordPlayingPlugin:
     def __init__(self, input_queue):
         self.app = None
         try:
-            self.app = dsdk.Discord(APPLICATION_ID, dsdk.CreateFlags.default)
+            self.app = dsdk.Discord(APPLICATION_ID, dsdk.enum.CreateFlags.Default)
         except Exception as e:
-            log.error("Discord Plugin could not connect: %s" % (str(e)))
+            log.exception("Discord Plugin could not connect: %s" % (str(e)))
             return
 
-        self.activity_manager = self.app.get_activity_manager()
+        self.activity_manager = self.app.GetActivityManager()
         self.previous_state = None
 
         self.input_queue = input_queue
@@ -51,11 +53,11 @@ class DiscordPlayingPlugin:
         if self.previous_state and self.previous_state == current_state:
             return
 
-        activity_timestamps = dsdk.ActivityTimestamps()
-        activity_timestamps.start = current_state.playtime
+        activity_timestamps = dsdk_model.ActivityTimestamps()
+        activity_timestamps.Start = current_state.playtime
 
-        activity_assets_playing = dsdk.ActivityAssets()
-        activity_assets_playing.large_image = "signale"
+        activity_assets_playing = dsdk_model.ActivityAssets()
+        activity_assets_playing.LargeImage = "signale"
 
         # sometimes the sim returns weird values, so do string comparison for sanity
         if current_state.online and current_state.online == "true":
@@ -64,19 +66,19 @@ class DiscordPlayingPlugin:
             state = "Offline"
         state += ", %s" % current_state.simzeit
 
-        activity = dsdk.Activity()
-        activity.state = state
-        activity.details = current_state.name
-        activity.timestamps = activity_timestamps
-        activity.assets = activity_assets_playing
+        activity = dsdk_model.Activity()
+        activity.State = state
+        activity.Details = current_state.name
+        activity.Timestamps = activity_timestamps
+        activity.Assets = activity_assets_playing
 
         # we update the activity
         log.debug("Push new playing state")
-        self.activity_manager.update_activity(activity, lambda result: debug_callback("update_activity", result))
+        self.activity_manager.UpdateActivity(activity, lambda result: debug_callback("update_activity", result))
         self.previous_state = current_state
 
     def clear_activity(self):
-        self.activity_manager.clear_activity()
+        self.activity_manager.ClearActivity()
 
     def process_message(self, message):
         if isinstance(message, IngameStatus):
@@ -94,7 +96,7 @@ class DiscordPlayingPlugin:
                     self.process_message(message)
                 except queue.Empty:
                     pass
-                self.app.run_callbacks()
+                self.app.RunCallbacks()
                 time.sleep(1/10)
         except StopRequest:
             pass
