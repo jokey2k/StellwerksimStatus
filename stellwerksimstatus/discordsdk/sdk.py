@@ -1,5 +1,6 @@
 from ctypes import *
 import os.path
+import platform
 
 DiscordClientId = c_int64
 DiscordVersion = c_int32
@@ -531,8 +532,16 @@ def DiscordCreateParamsSetDefault(params):
     params.voice_version = 1
     params.achievement_version = 1
 
-
-dll_path = os.path.join(os.path.dirname(__file__), "lib")
+# Determine platform / bit to load proper library
+# FIXME: Need to test this behaviour on M1 vs Intel Mac
+dll_basepath = os.path.join(os.path.dirname(__file__), "lib")
+if platform.system() == "Windows":
+    if platform.architecture()[0] == "64bit":
+        dll_path = os.path.join(dll_basepath, "x86_64")
+    else:
+        dll_path = os.path.join(dll_basepath, "x86")
+else:
+    dll_path = os.path.join(dll_basepath, "x86_64")
 dll = CDLL(os.path.join(dll_path, "discord_game_sdk"))
 DiscordCreate = dll.DiscordCreate 
 DiscordCreate.argtypes = (DiscordVersion, POINTER(DiscordCreateParams), POINTER(POINTER(IDiscordCore)))
