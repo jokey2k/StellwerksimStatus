@@ -2,7 +2,7 @@ from cx_Freeze import setup, Executable
 import sys
 
 build_options = {
-    'packages': ['multiprocessing'],
+    'packages': ['multiprocessing', 'lxml'],
     'excludes': ['tkinter'],
     'include_files':['lib/']
 }
