@@ -21,7 +21,7 @@ VERSION = "1.0.0"
 # Discord Plugin API id
 APPLICATION_ID = 934472966455046194
 ElementClass = etree.Element("temp").__class__
-IngameStatus = namedtuple("IngameStatus", ["name", "region", "online", "simzeit", "playtime"])
+IngameStatus = namedtuple("IngameStatus", ["name", "region", "online", "simzeit", "playtime", ])
 
 class StopRequest(StopIteration):
     pass
@@ -124,6 +124,8 @@ class StellwerkSimPlugin:
         self.simzeit = None
         self.playtime = None
 
+        self.connect_in_progress = False
+
     def reset_parser(self):
         result = None
         if self.parser is not None:
@@ -136,15 +138,20 @@ class StellwerkSimPlugin:
         return result
 
     def connect(self):
+        if self.connect_in_progress:
+            return
+        self.connect_in_progress = True
         self.reset_state()
         try:
             log.debug("Trying to connect to %s on %s" % (self.ip, self.port))
             self.socket = socket.create_connection((self.ip, self.port))
         except (socket.error, OSError, IOError) as e:
+            self.connect_in_progress = False
             log.info("Failed creating connection: %s" % str(e))
             return
         self.socket.setblocking(False)
         self.connected = True
+        self.connect_in_progress = False
         log.debug("Connection established to %s on %s" % (self.ip, self.port))
 
     def process_socket(self):
@@ -255,12 +262,16 @@ class StellwerkSimPlugin:
         log.debug("..sent register")
 
     def trigger_status(self):
+        if not self.registered:
+            return
         self.query_state = "anlageninfo"
         elem = etree.Element("anlageninfo")
         self.write_socket(elem)
         log.debug("..sent status request")
 
     def trigger_simzeit(self):
+        if not self.registered:
+            return
         self.query_state = "simzeit"
         elem = etree.Element("simzeit")
         elem.set("sender", "123456")
