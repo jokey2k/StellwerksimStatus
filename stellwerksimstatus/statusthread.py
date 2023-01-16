@@ -44,17 +44,21 @@ class StellwerksimStatusThread(QThread):
                     # only check every 5 seconds, this is somehow expensive
                     # FIXME: Add psutil.pid_exists(pid) to possibly skip this, needs performance check
                     self.currentStatus['process_running'] = self.check_communicator_process()
-                    if self.currentStatus['process_running']:
-                        self.stellwerksim_socket.connect()
                     status = {'process_status': 'Connector running' if self.currentStatus['process_running'] else 'Connector not running'}
                     self.statusChanged.emit(status)
                     qApp.processEvents()
+                    if self.currentStatus['process_running']:
+                        self.stellwerksim_socket.connect()
                     if not self.stellwerksim_socket.connected:
                         self.statusChanged.emit(status)
                         i += 1
                         self.sleep(1)
-                        continue
-                    self.stellwerksim_socket.playtime = time.time()
+                    else:
+                        self.stellwerksim_socket.playtime = time.time()
+                if not self.stellwerksim_socket.connected:
+                    i += 1
+                    self.sleep(1)
+                    continue
             else:
                 self.currentStatus['process_running'] = True
 
