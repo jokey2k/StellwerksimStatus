@@ -1,9 +1,9 @@
 import sys
+import time
 
 from PySide6.QtCore import QSettings, QUrl, QDateTime, QByteArray
 from PySide6.QtGui import QAction, QIcon
 from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QMessageBox, QDialog, QMenu
-
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtNetwork import QNetworkCookie
 
@@ -145,6 +145,7 @@ class StatusDialog(QDialog):
         if not isinstance(new_state, IngameStatus):
             self.reset_state_labels()
             self.ui.currentRailwayControlCenterLineEdit.setText(new_state['process_status'])
+            self.stellwerksim_state = None
             self.setUpdatesEnabled(True)
             return
 
@@ -153,7 +154,13 @@ class StatusDialog(QDialog):
             self.ui.currentRailwayControlCenterRegionLineEdit.setText(new_state.region)
             self.ui.inGameClockLineEdit.setText(new_state.simzeit)
             self.ui.onlineLineEdit.setText('online' if new_state.online else 'offline')
-            self.ui.playDurationLineEdit.setText(new_state.playtime)
+            play_duration = time.time() - new_state.playtime
+            secs = "%s" % (int(play_duration % 60))
+            play_duration /= 60
+            mins = "%s" % (int(play_duration % 60))
+            play_duration /= 60
+            hours = "%s" % int(play_duration)
+            self.ui.playDurationLineEdit.setText(str("%s:%s:%s" % (hours, mins, secs)))
 
         self.setUpdatesEnabled(True)
         self.stellwerksim_state = new_state
