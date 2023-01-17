@@ -197,6 +197,9 @@ class StatusDialog(QDialog):
         self.ui.playDurationLineEdit.clear()
 
     def quitProgram(self):
+        if self.checkThread is not None:
+            self.checkThread.stop_request()
+            self.checkThread.wait()
         qApp.quit()
 
 
