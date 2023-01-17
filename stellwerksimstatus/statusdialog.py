@@ -32,6 +32,8 @@ STWSIM_COOKIENAMES = [
 DEFAULT_SETTINGS = {
     'homepage': 'https://www.stellwerksim.de/anlagen.php',
     'communicatorhost': 'localhost',
+    'mainwindow_width': 700,
+    'mainwindow_height': 700,
 }
 
 class StatusDialog(QDialog):
@@ -42,6 +44,7 @@ class StatusDialog(QDialog):
 
         self.settings = QSettings()
         self.initialSettings()
+        self.resize(self.settings.value('mainwindow_width'), self.settings.value('mainwindow_height'))
 
         self.ui.browserWidget = QWebEngineView()
         self.ui.verticalLayout_2.addWidget(self.ui.browserWidget)
