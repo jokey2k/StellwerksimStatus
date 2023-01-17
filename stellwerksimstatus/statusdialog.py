@@ -45,6 +45,7 @@ class StatusDialog(QDialog):
         self.settings = QSettings()
         self.initialSettings()
         self.resize(self.settings.value('mainwindow_width'), self.settings.value('mainwindow_height'))
+        self.load_application_settings()
 
         self.ui.browserWidget = QWebEngineView()
         self.ui.verticalLayout_2.addWidget(self.ui.browserWidget)
@@ -69,6 +70,16 @@ class StatusDialog(QDialog):
             current_value = self.settings.value(name)
             if not current_value:
                 self.settings.setValue(name, value)
+
+    def load_application_settings(self):
+        self.ui.homepageLineEdit.setText(self.settings.value('homepage'))
+        self.ui.homepageLineEdit.returnPressed.connect(self.save_application_settings)
+        self.ui.communicatorAddressLineEdit.setText(self.settings.value('communicatorhost')),
+        self.ui.communicatorAddressLineEdit.returnPressed.connect(self.save_application_settings)
+
+    def save_application_settings(self):
+        self.settings.setValue('homepage', self.ui.homepageLineEdit.text())
+        self.settings.setValue('communicatorhost', self.ui.communicatorAddressLineEdit.text())
 
     def loadWebsiteCookies(self):
         cookiestore = self.ui.browserWidget.page().profile().cookieStore()
