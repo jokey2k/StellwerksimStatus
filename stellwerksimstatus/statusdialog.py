@@ -30,7 +30,7 @@ STWSIM_COOKIENAMES = [
     'phpbb3_8isz4_u'
 ]
 DEFAULT_SETTINGS = {
-    'homepage': 'https://www.stellwerksim.de',
+    'homepage': 'https://www.stellwerksim.de/anlagen.php',
     'communicatorhost': 'localhost',
 }
 
