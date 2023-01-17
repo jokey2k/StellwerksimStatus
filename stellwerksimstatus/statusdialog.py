@@ -21,8 +21,7 @@ from PySide6.QtNetwork import QNetworkCookie
 from stellwerksimstatus.ui_statusdialog import Ui_Dialog
 from stellwerksimstatus.statusthread import StellwerksimStatusThread
 from stellwerksimstatus import IngameStatus
-
-import status_rc
+import stellwerksimstatus.status_rc
 
 STWSIM_COOKIENAMES = [
     'cb-enabled',
