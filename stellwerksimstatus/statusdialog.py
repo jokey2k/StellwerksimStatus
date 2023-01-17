@@ -8,6 +8,7 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
+import multiprocessing
 import sys
 import time
 
@@ -187,6 +188,7 @@ class StatusDialog(QDialog):
 
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     app = QApplication(sys.argv)
 
     app.setApplicationName("StellwerksimStatusTool")
