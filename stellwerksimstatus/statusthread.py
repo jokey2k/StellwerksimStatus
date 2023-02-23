@@ -1,6 +1,7 @@
 import base64
 import logging
 from multiprocessing import Process, Queue as mp_Queue
+import platform
 import time
 
 import psutil
@@ -18,6 +19,13 @@ class StellwerksimStatusThread(QThread):
         self.discordprocess = None
         self.discordqueue = None
         self.playtime = 0
+
+        if platform.system() == "Darwin":
+            self.check_func = self.check_communicator_process_osx
+        elif platform.system() == "Windows":
+            self.check_func = self.check_communicator_process_osx
+        else:
+            raise NotImplementedError("Platform %s has no check function yet" % platform.system())
 
     def set_offline(self):
         self.currentStatus = {
@@ -43,7 +51,7 @@ class StellwerksimStatusThread(QThread):
                     self.stop_discord()
                     # only check every 5 seconds, this is somehow expensive
                     # FIXME: Add psutil.pid_exists(pid) to possibly skip this, needs performance check
-                    self.currentStatus['process_running'] = self.check_communicator_process()
+                    self.currentStatus['process_running'] = self.check_func()
                     status = {'process_status': 'Connector running' if self.currentStatus['process_running'] else 'Connector not running'}
                     self.statusChanged.emit(status)
                     qApp.processEvents()
@@ -112,7 +120,31 @@ class StellwerksimStatusThread(QThread):
             logging.info("Queueing discord update")
             self.discordqueue.put(state)
 
-    def check_communicator_process(self):
+    def check_communicator_process_osx(self):
+        found_running = False
+
+        for proc in psutil.process_iter():
+            cmdline = []
+            try:
+                processName = proc.name()
+                if not processName.startswith("java"):
+                    continue
+                cmdline = proc.cmdline()
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                continue
+
+            if self.currentStatus['process_pid'] == proc.pid:
+                found_running = True
+                break
+
+            if '-Djnlp.webserver=www.stellwerksim.de' in cmdline:
+                self.currentStatus['process_pid'] = proc.pid
+                found_running = True
+                break
+
+        return found_running
+
+    def check_communicator_process_windows(self):
         found_running = False
 
         for proc in psutil.process_iter():

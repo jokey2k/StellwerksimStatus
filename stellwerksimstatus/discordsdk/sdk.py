@@ -540,9 +540,16 @@ if platform.system() == "Windows":
         dll_path = os.path.join(dll_basepath, "x86_64")
     else:
         dll_path = os.path.join(dll_basepath, "x86")
-else:
+elif platform.system() == "Darwin":
     dll_path = os.path.join(dll_basepath, "x86_64")
-dll = CDLL(os.path.join(dll_path, "discord_game_sdk"))
+    if platform.processor() == "arm":
+        dll_path = os.path.join(dll_basepath, "aarch64")
+
+if platform.system() == "Darwin":
+    dll = CDLL(os.path.join(dll_path, "discord_game_sdk.dylib"))
+else:
+    dll = CDLL(os.path.join(dll_path, "discord_game_sdk"))
+
 DiscordCreate = dll.DiscordCreate 
 DiscordCreate.argtypes = (DiscordVersion, POINTER(DiscordCreateParams), POINTER(POINTER(IDiscordCore)))
 DiscordCreate.restype = c_int32
