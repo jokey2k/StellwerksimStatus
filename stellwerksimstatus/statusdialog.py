@@ -177,13 +177,13 @@ class StatusDialog(QDialog):
             self.ui.currentRailwayControlCenterLineEdit.setText(new_state.name)
             self.ui.currentRailwayControlCenterRegionLineEdit.setText(new_state.region)
             self.ui.inGameClockLineEdit.setText(new_state.simzeit)
-            self.ui.onlineLineEdit.setText('online' if new_state.online else 'offline')
+            self.ui.onlineLineEdit.setText('online' if (new_state.online and new_state.online == "true") else 'offline')
             play_duration = time.time() - new_state.playtime
-            secs = "%s" % (int(play_duration % 60))
+            secs = "%s" % str(int(play_duration % 60)).zfill(2)
             play_duration /= 60
-            mins = "%s" % (int(play_duration % 60))
+            mins = "%s" % str(int(play_duration % 60)).zfill(2)
             play_duration /= 60
-            hours = "%s" % int(play_duration)
+            hours = "%s" % str(int(play_duration)).zfill(2)
             self.ui.playDurationLineEdit.setText(str("%s:%s:%s" % (hours, mins, secs)))
 
         self.setUpdatesEnabled(True)
